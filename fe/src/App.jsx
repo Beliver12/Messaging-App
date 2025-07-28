@@ -31,7 +31,7 @@ const LogInForm = ({ user, setUser }) => {
        email: email
     }
 
-    const url = 'https://messaging-app-messaging-app-livee.up.railway.app//users/login';
+    const url = 'https://messaging-app-messaging-app-livee.up.railway.app/users/login';
 
     const options = {
       method: "POST",

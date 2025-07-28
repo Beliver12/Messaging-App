@@ -63,10 +63,10 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
+/*
 app.use(cors({
   origin: 'http://localhost:5173', // Replace with your frontend URL
-}));
+}));*/
 
 app.use('/session', routes.session);
 app.use('/users', routes.users)

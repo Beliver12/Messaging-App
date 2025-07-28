@@ -25,7 +25,7 @@ export const SignUp = () => {
       formData.append("myfile", image.data); 
     }
   
-    fetch("http://localhost:8080/users/signup", {
+    fetch("https://messaging-app-messaging-app-livee.up.railway.app/users/signup", {
       method: "POST",
       body: formData, 
     })

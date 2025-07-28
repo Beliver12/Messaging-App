@@ -31,7 +31,7 @@ const LogInForm = ({ user, setUser }) => {
        email: email
     }
 
-    const url = 'http://localhost:8080/users/login';
+    const url = 'https://messaging-app-messaging-app-livee.up.railway.app//users/login';
 
     const options = {
       method: "POST",
@@ -82,7 +82,7 @@ const LogInForm = ({ user, setUser }) => {
       className="homepage"
       style={{ backgroundColor: "black", background: "none" }}
     >
-      <img className="profileImage" src={`http://localhost:8080/images/${image}`} alt="" />
+      <img className="profileImage" src={`https://messaging-app-messaging-app-livee.up.railway.app/images/${image}`} alt="" />
       <h1>Loged in! {user}</h1> 
       <p>{about}</p>
       <button onClick={logOut}>Log Out</button>

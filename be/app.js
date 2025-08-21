@@ -60,11 +60,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use(
+/*app.use(
   cors({
-    origin: "https://messaging-app-seven-chi.vercel.app/", // Replace with your frontend URL
+    origin: "http://localhost:5173", // Replace with your frontend URL
   }),
-);
+);*/
 
 app.use("/session", routes.session);
 app.use("/users", routes.users);

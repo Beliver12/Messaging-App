@@ -21,7 +21,7 @@ const LogInForm = ({ user, setUser }) => {
   const [about, setAbout] = useState(aboutUser);
   const [online, setOnline] = useState(isOnline);
   const [error, setError] = useState("");
-  const [path, setPath] = useState('http://localhost:8080')
+  const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app')
   //UserProfile.jsx
   const [userProfileOpen, setUserProfileOpen] = useState(false);
   //UserProfile.jsx
@@ -108,7 +108,7 @@ const LogInForm = ({ user, setUser }) => {
       .then((data) => {
         console.log(data);
         if (data.message === "jwt expired") {
-          verifyToken({ token, setUser });
+          verifyToken({ token, setUser, path });
         }
         setOtherUsers(data);
       });
@@ -138,7 +138,7 @@ const LogInForm = ({ user, setUser }) => {
       .then((data) => {
         console.log(data);
         if (data.message === "jwt expired") {
-          verifyToken({ token, setUser });
+          verifyToken({ token, setUser, path });
         }
         setNotifications(data);
         setNotificationsOpen(true);
@@ -169,7 +169,7 @@ const LogInForm = ({ user, setUser }) => {
       .then((data) => {
         console.log(data);
         if (data.message === "jwt expired") {
-          verifyToken({ token, setUser });
+          verifyToken({ token, setUser, path });
         }
         setUsersInChat(data);
         setChatOpen(true)

@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react"; 
 
-export const verifyToken = ({ token, setUser, setAddFriendsOpen }) => {
-   const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app')
+
+export const verifyToken = ({ token, setUser, setAddFriendsOpen, path }) => {
+
   const data = {
     accessToken: token,
   };

@@ -38,7 +38,7 @@ export const EditProfile = ({
       .then((res) => res.json())
       .then((data) => {
         if (data.message === "jwt expired") {
-          verifyToken({ accessToken, setUser });
+          verifyToken({ accessToken, setUser, path });
         }
         if (data.message) {
           setIsEdited("true");

@@ -34,7 +34,7 @@ export const AddFriends = ({ setUser, addFriendsOpen, setAddFriendsOpen, setOthe
       .then((res) => res.json())
       .then((data) => {
         if (data.message === "jwt expired") {
-          verifyToken({ token, setUser });
+          verifyToken({ token, setUser, path });
         }
         setOtherUser(data);
         setOtherUserProfileOpen(true);

@@ -21,7 +21,7 @@ const LogInForm = ({ user, setUser }) => {
   const [about, setAbout] = useState(aboutUser);
   const [online, setOnline] = useState(isOnline);
   const [error, setError] = useState("");
-  const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app')
+  const [path, setPath] = useState('http://localhost:8080')
   //UserProfile.jsx
   const [userProfileOpen, setUserProfileOpen] = useState(false);
   //UserProfile.jsx

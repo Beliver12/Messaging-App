@@ -1,8 +1,11 @@
+import { useState, useEffect } from "react"; 
+
 export const verifyToken = ({ token, setUser, setAddFriendsOpen }) => {
+   const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app')
   const data = {
     accessToken: token,
   };
-  const url = "http://localhost:8080/users/verifyToken";
+  const url = `${path}/users/verifyToken`;
   const options = {
     method: "POST",
     body: JSON.stringify(data),

@@ -1,0 +1,110 @@
+import { Link, Navigate } from "react-router";
+import { useState, useEffect } from "react";
+import { verifyToken } from "./verifyToken";
+
+export const Notifications = ({
+  setUser,
+  notificationsOpen,
+  notifications,
+  setNotificationsOpen,
+  setNotifications
+}) => {
+
+  const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app')
+
+  const closeNotifications = (e) => {
+    debugger
+    e.preventDefault();
+    setNotificationsOpen(false);
+  };
+
+  const declineFriendRequest = async (e) => {
+         e.preventDefault();
+         const token = localStorage.getItem("accessToken");
+         const data = {
+           accessToken: token,
+           id: e.target.id
+         };
+     
+         const url = `${path}/friends/declineFriendRequest`;
+         const options = {
+           method: "POST",
+           body: JSON.stringify(data),
+           headers: {
+             "Content-Type": "application/json",
+           },
+         };
+     
+         fetch(url, options)
+           .then((res) => res.json())
+           .then((data) => {
+             console.log(data);
+             if (data.message === "jwt expired") {
+               verifyToken({ token, setUser });
+             }
+             setNotifications(data);
+           alert("friend request declined")
+           });
+  }
+
+  const acceptFriendRequest = async (e) => {
+    debugger
+    e.preventDefault();
+    const token = localStorage.getItem("accessToken");
+    const data = {
+      accessToken: token,
+      id: e.target.id
+    };
+
+    const url = `${path}/friends/acceptFriendRequest`;
+    const options = {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(url, options)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        if (data.message === "jwt expired") {
+          verifyToken({ token, setUser });
+        }
+        setNotifications(data);
+        alert("friend request accepted")
+      });
+  }
+  
+  if (notificationsOpen) {
+    return (
+      <div
+        className="modal"
+        style={{ position: "absolute", width: "100vw", height: "100vh" }}
+      >
+        <div>
+          <ul className="list-of-user-to-be-added-as-friends">
+            {notifications !== undefined &&
+              notifications.map((user) => (
+                <li key={user.id} id={user.id}>
+                  <img
+                    id={user.id}
+                    className="profileImage"
+                    src={`${path}/images/${user.image}`}
+                    alt=""
+                  />
+                  {user.username}
+                  <button id={user.id} onClick={acceptFriendRequest}><img id={user.id} src="/accept.png" alt="" /></button>
+                  <button id={user.id} onClick={declineFriendRequest}><img id={user.id} src="/remove.png" alt="" /></button>
+                </li>
+              ))}
+          </ul>
+          <button onClick={closeNotifications}>Close</button>
+        </div>
+      </div>
+    );
+  } else {
+    return;
+  }
+};

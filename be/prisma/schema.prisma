@@ -1,10 +1,12 @@
 generator client {
   provider = "prisma-client-js"
+   previewFeatures = ["relationJoins"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  
 }
 
 model Test {
@@ -20,5 +22,13 @@ model User {
   about    String 
   isOnline String?
   image    String?
+   Friends Friends[]
 }
 
+model Friends {
+  id       Int    @id @default(autoincrement())
+  friendId Int?
+  User     User      @relation(fields: [userId], references: [id])
+  userId   Int
+  status   String?
+}

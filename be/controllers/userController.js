@@ -123,12 +123,12 @@ exports.usersPost = async (req, res) => {
     where: {
       OR: [
         {
-          userId: req.user.user.id
+          userId: req.user.user.id,
         },
         {
-          friendId: req.user.user.id
+          friendId: req.user.user.id,
         },
-      ]
+      ],
     },
   });
 

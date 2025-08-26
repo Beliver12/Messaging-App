@@ -7,53 +7,53 @@ export const Notifications = ({
   notificationsOpen,
   notifications,
   setNotificationsOpen,
-  setNotifications
+  setNotifications,
+  setUsersInChat,
 }) => {
-
-  const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app')
+  const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app');
 
   const closeNotifications = (e) => {
-    debugger
+    debugger;
     e.preventDefault();
     setNotificationsOpen(false);
   };
 
   const declineFriendRequest = async (e) => {
-         e.preventDefault();
-         const token = localStorage.getItem("accessToken");
-         const data = {
-           accessToken: token,
-           id: e.target.id
-         };
-     
-         const url = `${path}/friends/declineFriendRequest`;
-         const options = {
-           method: "POST",
-           body: JSON.stringify(data),
-           headers: {
-             "Content-Type": "application/json",
-           },
-         };
-     
-         fetch(url, options)
-           .then((res) => res.json())
-           .then((data) => {
-             console.log(data);
-             if (data.message === "jwt expired") {
-               verifyToken({ token, setUser, path });
-             }
-             setNotifications(data);
-           alert("friend request declined")
-           });
-  }
-
-  const acceptFriendRequest = async (e) => {
-    debugger
     e.preventDefault();
     const token = localStorage.getItem("accessToken");
     const data = {
       accessToken: token,
-      id: e.target.id
+      id: e.target.id,
+    };
+
+    const url = `${path}/friends/declineFriendRequest`;
+    const options = {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(url, options)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        if (data.message === "jwt expired") {
+          verifyToken({ token, setUser, path });
+        }
+        setNotifications(data);
+        alert("friend request declined");
+      });
+  };
+
+  const acceptFriendRequest = async (e) => {
+    debugger;
+    e.preventDefault();
+    const token = localStorage.getItem("accessToken");
+    const data = {
+      accessToken: token,
+      id: e.target.id,
     };
 
     const url = `${path}/friends/acceptFriendRequest`;
@@ -72,11 +72,12 @@ export const Notifications = ({
         if (data.message === "jwt expired") {
           verifyToken({ token, setUser });
         }
-        setNotifications(data);
-        alert("friend request accepted")
+        setNotifications(data.users);
+        setUsersInChat(data.users2);
+        alert("friend request accepted");
       });
-  }
-  
+  };
+
   if (notificationsOpen) {
     return (
       <div
@@ -95,8 +96,12 @@ export const Notifications = ({
                     alt=""
                   />
                   {user.username}
-                  <button id={user.id} onClick={acceptFriendRequest}><img id={user.id} src="/accept.png" alt="" /></button>
-                  <button id={user.id} onClick={declineFriendRequest}><img id={user.id} src="/remove.png" alt="" /></button>
+                  <button id={user.id} onClick={acceptFriendRequest}>
+                    <img id={user.id} src="/accept.png" alt="" />
+                  </button>
+                  <button id={user.id} onClick={declineFriendRequest}>
+                    <img id={user.id} src="/remove.png" alt="" />
+                  </button>
                 </li>
               ))}
           </ul>

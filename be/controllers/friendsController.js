@@ -27,16 +27,23 @@ exports.addFriendsPost = async (req, res) => {
 
   const addedUsers = await prisma.friends.findMany({
     where: {
-      userId: req.user.user.id,
+      OR: [
+        {
+          userId: req.user.user.id,
+        },
+        {
+          friendId: req.user.user.id,
+        },
+      ],
     },
   });
-
   const addedFriends = addedUsers.map((user) => user.friendId);
+  const addedFriends2 = addedUsers.map((user) => user.userId);
 
   const users = await prisma.user.findMany({
     where: {
       id: {
-        notIn: [req.user.user.id, ...addedFriends],
+        notIn: [req.user.user.id, ...addedFriends, ...addedFriends2],
       },
     },
   });
@@ -66,13 +73,13 @@ exports.notificationPost = async (req, res) => {
 };
 
 exports.declineFriendRequestPost = async (req, res) => {
-  const id = Number(req.body.id)
+  const id = Number(req.body.id);
   await prisma.friends.deleteMany({
     where: {
       userId: id,
       friendId: req.user.user.id,
-    }
-  })
+    },
+  });
 
   const friendInvites = await prisma.friends.findMany({
     where: {
@@ -95,16 +102,16 @@ exports.declineFriendRequestPost = async (req, res) => {
 };
 
 exports.acceptFriendRequest = async (req, res) => {
-  const id = Number(req.body.id)
+  const id = Number(req.body.id);
   await prisma.friends.updateMany({
     where: {
       userId: id,
       friendId: req.user.user.id,
     },
     data: {
-      status: 'friends'
-    }
-  })
+      status: "friends",
+    },
+  });
 
   const friendInvites = await prisma.friends.findMany({
     where: {
@@ -123,7 +130,40 @@ exports.acceptFriendRequest = async (req, res) => {
     },
   });
 
-  return res.send(users);
+  const friendsId = await prisma.friends.findMany({
+    where: {
+      OR: [
+        {
+          userId: req.user.user.id,
+          status: "friends",
+        },
+        {
+          friendId: req.user.user.id,
+          status: "friends",
+        },
+      ],
+    },
+  });
+
+  const friends = friendsId.map((user) => user.friendId);
+  const friends2 = friendsId.map((user) => user.userId);
+
+  const users2 = await prisma.user.findMany({
+    where: {
+      AND: [
+        {
+          id: {
+            in: [...friends, ...friends2],
+          },
+        },
+        {
+          id: { not: req.user.user.id },
+        },
+      ],
+    },
+  });
+
+  res.send({ users: users, users2: users2 });
 };
 
 exports.openChat = async (req, res) => {
@@ -132,34 +172,85 @@ exports.openChat = async (req, res) => {
       OR: [
         {
           userId: req.user.user.id,
-          status: 'friends'
+          status: "friends",
         },
         {
           friendId: req.user.user.id,
-          status: 'friends'
+          status: "friends",
         },
-        
-      ]
+      ],
     },
-  })
+  });
 
-  const friends = friendsId.map((user) => user.friendId)
-  const friends2 = friendsId.map((user) => user.userId)
+  const friends = friendsId.map((user) => user.friendId);
+  const friends2 = friendsId.map((user) => user.userId);
 
   const users = await prisma.user.findMany({
     where: {
-      AND: [ {
-        id: {
-          in: [...friends, ...friends2]
-        }
-      },
-      {
-        id: {not : req.user.user.id}
-      }
-      ]
+      AND: [
+        {
+          id: {
+            in: [...friends, ...friends2],
+          },
+        },
+        {
+          id: { not: req.user.user.id },
+        },
+      ],
     },
-  
-})
+  });
 
-return res.send(users);
-}
+  return res.send(users);
+};
+
+exports.removeFriend = async (req, res) => {
+  await prisma.friends.deleteMany({
+    where: {
+      OR: [
+        {
+          userId: req.user.user.id,
+          friendId: Number(req.body.friendId),
+        },
+        {
+          userId: Number(req.body.friendId),
+          friendId: req.user.user.id,
+        },
+      ],
+    },
+  });
+
+  const friendsId = await prisma.friends.findMany({
+    where: {
+      OR: [
+        {
+          userId: req.user.user.id,
+          status: "friends",
+        },
+        {
+          friendId: req.user.user.id,
+          status: "friends",
+        },
+      ],
+    },
+  });
+
+  const friends = friendsId.map((user) => user.friendId);
+  const friends2 = friendsId.map((user) => user.userId);
+
+  const users = await prisma.user.findMany({
+    where: {
+      AND: [
+        {
+          id: {
+            in: [...friends, ...friends2],
+          },
+        },
+        {
+          id: { not: req.user.user.id },
+        },
+      ],
+    },
+  });
+
+  return res.send(users);
+};

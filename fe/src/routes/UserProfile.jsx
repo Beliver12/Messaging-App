@@ -8,8 +8,8 @@ export const UserProfile = ({
   userProfileOpen,
   setUserProfileOpen,
 }) => {
-  const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app')
-  
+  const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app');
+
   const closeUserProfile = (event) => {
     event.preventDefault();
     setUserProfileOpen(false);

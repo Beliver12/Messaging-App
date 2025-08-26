@@ -3,11 +3,16 @@ import { useState, useEffect } from "react";
 import { verifyToken } from "./verifyToken";
 import { OtherUserProfile } from "./OtherUserProfile";
 
-export const AddFriends = ({ setUser, addFriendsOpen, setAddFriendsOpen, setOtherUsers, otherUsers  }) => {
- 
+export const AddFriends = ({
+  setUser,
+  addFriendsOpen,
+  setAddFriendsOpen,
+  setOtherUsers,
+  otherUsers,
+}) => {
   const [otherUser, setOtherUser] = useState();
   const [otherUserProfileOpen, setOtherUserProfileOpen] = useState();
-  const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app')
+  const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app');
   const closeAddFriends = (event) => {
     event.preventDefault();
     setAddFriendsOpen(false);
@@ -40,8 +45,6 @@ export const AddFriends = ({ setUser, addFriendsOpen, setAddFriendsOpen, setOthe
         setOtherUserProfileOpen(true);
       });
   };
-
-
 
   const addFriend = async (e) => {
     e.preventDefault();
@@ -120,7 +123,6 @@ export const AddFriends = ({ setUser, addFriendsOpen, setAddFriendsOpen, setOthe
                   </button>
                 </li>
               ))}
-              
           </ul>
           <button onClick={closeAddFriends}>Close</button>
         </div>

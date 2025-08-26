@@ -10,7 +10,7 @@ export const SignUp = () => {
   const [error, setError] = useState("");
   const [isSignedIn, setIsSignedIn] = useState("");
   const [image, setImage] = useState({ preview: "", data: "" });
-  const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app')
+  const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app');
   const handleSubmit = (event) => {
     event.preventDefault();
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"; 
+import { useState, useEffect } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import { Link } from "react-router";
@@ -21,7 +21,7 @@ const LogInForm = ({ user, setUser }) => {
   const [about, setAbout] = useState(aboutUser);
   const [online, setOnline] = useState(isOnline);
   const [error, setError] = useState("");
-  const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app')
+  const [path, setPath] = useState("http://localhost:8080");
   //UserProfile.jsx
   const [userProfileOpen, setUserProfileOpen] = useState(false);
   //UserProfile.jsx
@@ -42,7 +42,8 @@ const LogInForm = ({ user, setUser }) => {
 
   //Chat.jsx
   const [usersInChat, setUsersInChat] = useState();
-  const [chatOpen, setChatOpen] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatFormOpen, setChatFormOpen] = useState(false);
   //Chat.jsx
 
   const logOut = (event) => {
@@ -52,7 +53,7 @@ const LogInForm = ({ user, setUser }) => {
     const data = {
       accessToken: token,
     };
-    
+
     const url = `${path}/users/logOut`;
     const options = {
       method: "POST",
@@ -74,7 +75,7 @@ const LogInForm = ({ user, setUser }) => {
     localStorage.removeItem("about");
     localStorage.removeItem("online");
     setUser("");
-    setChatOpen(false)
+    setChatOpen(false);
   };
 
   const openUserProfile = async (event) => {
@@ -82,7 +83,7 @@ const LogInForm = ({ user, setUser }) => {
 
     const token = localStorage.getItem("accessToken");
 
-    verifyToken({ token, setUser });
+    verifyToken({ token, setUser, path });
     setUserProfileOpen(true);
   };
 
@@ -147,39 +148,38 @@ const LogInForm = ({ user, setUser }) => {
 
   const openChat = async (e) => {
     e.preventDefault();
-    if(!chatOpen) {
-          
-    
-    const token = localStorage.getItem("accessToken");
-    const data = {
-      accessToken: token,
-    };
+    if (!chatOpen) {
+      const token = localStorage.getItem("accessToken");
+      const data = {
+        accessToken: token,
+      };
 
-    const url = `${path}/friends/openChat`;
-    const options = {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
+      const url = `${path}/friends/openChat`;
+      const options = {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
 
-    fetch(url, options)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        if (data.message === "jwt expired") {
-          verifyToken({ token, setUser, path });
-        }
-        setUsersInChat(data);
-        setChatOpen(true)
-        document.querySelector(".welcome").style.display = "none"
-      });
-    } else if (chatOpen){
-          setChatOpen(false)
-         document.querySelector(".welcome").style.display = "flex"
+      fetch(url, options)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          if (data.message === "jwt expired") {
+            verifyToken({ token, setUser, path });
+          }
+          setUsersInChat(data);
+          setChatOpen(true);
+          document.querySelector(".welcome").style.display = "none";
+        });
+    } else if (chatOpen) {
+      setChatOpen(false);
+      setChatFormOpen(false);
+      document.querySelector(".welcome").style.display = "flex";
     }
-  }
+  };
 
   const logIn = async (event) => {
     event.preventDefault();
@@ -272,13 +272,57 @@ const LogInForm = ({ user, setUser }) => {
         >
           Writer icons created by SeyfDesigner - Flaticon
         </a>
-        <a href="https://www.flaticon.com/free-icons/message" title="message icons">Message icons created by Freepik - Flaticon</a>
-        <a href="https://www.flaticon.com/free-icons/notification" title="notification icons">Notification icons created by Pixel perfect - Flaticon</a>
-        <a href="https://www.flaticon.com/free-icons/edit-info" title="edit info icons">Edit info icons created by ZAK - Flaticon</a>
-        <a href="https://www.flaticon.com/free-icons/add-user" title="add user icons">Add user icons created by Freepik - Flaticon</a>
-        <a href="https://www.flaticon.com/free-icons/logout" title="logout icons">Logout icons created by Pixel perfect - Flaticon</a>
-        <a href="https://www.flaticon.com/free-icons/reject" title="reject icons">Reject icons created by Good Ware - Flaticon</a>
-        <a href="https://www.flaticon.com/free-icons/tick" title="tick icons">Tick icons created by kliwir art - Flaticon</a>
+        <a
+          href="https://www.flaticon.com/free-icons/message"
+          title="message icons"
+        >
+          Message icons created by Freepik - Flaticon
+        </a>
+        <a
+          href="https://www.flaticon.com/free-icons/notification"
+          title="notification icons"
+        >
+          Notification icons created by Pixel perfect - Flaticon
+        </a>
+        <a
+          href="https://www.flaticon.com/free-icons/edit-info"
+          title="edit info icons"
+        >
+          Edit info icons created by ZAK - Flaticon
+        </a>
+        <a
+          href="https://www.flaticon.com/free-icons/add-user"
+          title="add user icons"
+        >
+          Add user icons created by Freepik - Flaticon
+        </a>
+        <a
+          href="https://www.flaticon.com/free-icons/logout"
+          title="logout icons"
+        >
+          Logout icons created by Pixel perfect - Flaticon
+        </a>
+        <a
+          href="https://www.flaticon.com/free-icons/reject"
+          title="reject icons"
+        >
+          Reject icons created by Good Ware - Flaticon
+        </a>
+        <a
+          href="https://www.flaticon.com/free-icons/message"
+          title="message icons"
+        >
+          Message icons created by onlyhasbi - Flaticon
+        </a>
+        <a href="https://www.flaticon.com/free-icons/tick" title="tick icons">
+          Tick icons created by kliwir art - Flaticon
+        </a>
+        <a
+          href="https://www.flaticon.com/free-icons/unfriend"
+          title="unfriend icons"
+        >
+          Unfriend icons created by kliwir art - Flaticon
+        </a>
       </>
     );
   }
@@ -323,13 +367,22 @@ const LogInForm = ({ user, setUser }) => {
           </div>
         </div>
         <div className="buttons">
-        <button onClick={openChat}>Open Chat <img src="/chat.png" alt="" /></button>
-        <button onClick={openNotifications}>Notifications <img src="/active.png" alt="" /></button>
-        <button onClick={editProfile}>Edit Profile <img src="/edit-button.png" alt="" /></button>
-        <button onClick={openAddFriends}>Add Friends <img src="/add-user.png" alt="" /></button>
-        <button onClick={logOut}>Log Out <img src="logout.png" alt="" /></button>
+          <button onClick={openChat}>
+            Open Chat <img src="/chat.png" alt="" />
+          </button>
+          <button onClick={openNotifications}>
+            Notifications <img src="/active.png" alt="" />
+          </button>
+          <button onClick={editProfile}>
+            Edit Profile <img src="/edit-button.png" alt="" />
+          </button>
+          <button onClick={openAddFriends}>
+            Add Friends <img src="/add-user.png" alt="" />
+          </button>
+          <button onClick={logOut}>
+            Log Out <img src="logout.png" alt="" />
+          </button>
         </div>
-        
       </div>
       <AddFriends
         setUser={setUser}
@@ -362,24 +415,35 @@ const LogInForm = ({ user, setUser }) => {
         notifications={notifications}
         setNotificationsOpen={setNotificationsOpen}
         setNotifications={setNotifications}
+        setUsersInChat={setUsersInChat}
       />
-     <Chat usersInChat={usersInChat}  chatOpen={chatOpen} setChatOpen={setChatOpen}/>
-     <div className="welcome">
-     <div className="flex flex-col items-center justify-center h-full text-white text-center p-6">
-      <div className="max-w-md border border-yellow-500 rounded-2xl p-6 bg-[#1e1e1e] shadow-md">
-        <h2 className="text-3xl font-semibold mb-4">👋 Welcome, {user}!</h2>
-        <p className="mb-2">Start chatting with your friends using the sidebar.</p>
-        <ul className="text-left mt-4 space-y-2">
-          <li>➤ Click <strong>“Open Chat”</strong> to view your messages</li>
-          <li>➤ Add friends to expand your network</li>
-          <li>➤ Stay connected and chat in real time!</li>
-        </ul>
+      <Chat
+        usersInChat={usersInChat}
+        setUser={setUser}
+        chatOpen={chatOpen}
+        setChatOpen={setChatOpen}
+        setUsersInChat={setUsersInChat}
+        setChatFormOpen={setChatFormOpen}
+        chatFormOpen={chatFormOpen}
+      />
+      <div className="welcome">
+        <div className="flex flex-col items-center justify-center h-full text-white text-center p-6">
+          <div className="max-w-md border border-yellow-500 rounded-2xl p-6 bg-[#1e1e1e] shadow-md">
+            <h2 className="text-3xl font-semibold mb-4">👋 Welcome, {user}!</h2>
+            <p className="mb-2">
+              Start chatting with your friends using the sidebar.
+            </p>
+            <ul className="text-left mt-4 space-y-2">
+              <li>
+                ➤ Click <strong>“Open Chat”</strong> to view your messages
+              </li>
+              <li>➤ Add friends to expand your network</li>
+              <li>➤ Stay connected and chat in real time!</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
-</div>
-
-     </div>
-   
   );
 };
 

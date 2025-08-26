@@ -1,7 +1,4 @@
-
-
 export const verifyToken = ({ token, setUser, setAddFriendsOpen, path }) => {
-
   const data = {
     accessToken: token,
   };

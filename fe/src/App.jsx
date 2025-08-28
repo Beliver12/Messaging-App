@@ -337,7 +337,7 @@ const LogInForm = ({ user, setUser }) => {
           {online === "true" ? (
             <img
               className="profileImage"
-              src={`http://localhost:8080/images/${image}`}
+              src={`${path}/images/${image}`}
               alt=""
               style={{
                 borderWidth: 4,
@@ -348,7 +348,7 @@ const LogInForm = ({ user, setUser }) => {
           ) : (
             <img
               className="profileImage"
-              src={`http://localhost:8080/images/${image}`}
+              src={`${path}/images/${image}`}
               alt=""
               style={{
                 borderWidth: 4,

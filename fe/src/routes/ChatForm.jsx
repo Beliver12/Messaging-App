@@ -15,7 +15,18 @@ export const ChatForm = ({ chatFormOpen, setChatFormOpen }) => {
     return (
       <div className="chat-form">
         <button onClick={closeChatForm}>Close Chat</button>
-        <h1>Lets chat</h1>
+        <form className="chatForm" action="">
+        <input
+        className="send-image"
+            type="file"
+            accept="image/*"
+            id="myfile"
+            name="myfile"
+          />
+        <textarea className="chat" name="chat" id="chat" ></textarea>
+        <button>Send</button>
+        </form>
+       
       </div>
     );
   } else {

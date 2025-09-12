@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
-const jwt = require("jsonwebtoken");
+const { getIO } = require("../socket");
+
 const databaseUrl =
   process.env.NODE_ENV === "test"
     ? process.env.TEST_DATABASE_URL
@@ -12,9 +13,9 @@ const prisma = new PrismaClient({
     },
   },
 });
-const bcrypt = require("bcrypt");
 
 exports.addFriendsPost = async (req, res) => {
+  const io = getIO();
   const id = Number(req.body.friendId);
 
   await prisma.friends.create({
@@ -23,6 +24,14 @@ exports.addFriendsPost = async (req, res) => {
       status: "pending",
       userId: req.user.user.id,
     },
+  });
+
+  const currentUser = await prisma.user.findUnique({
+    where: { id: req.user.user.id },
+  });
+
+  const friend = await prisma.user.findUnique({
+    where: { id: id },
   });
 
   const addedUsers = await prisma.friends.findMany({
@@ -46,6 +55,38 @@ exports.addFriendsPost = async (req, res) => {
         notIn: [req.user.user.id, ...addedFriends, ...addedFriends2],
       },
     },
+  });
+
+  const sockets = await io.in(`user:${friend.username}`).fetchSockets();
+  sockets.forEach((socket) => {
+    socket.emit("newFriendRequest", {
+      id: currentUser.id,
+      username: currentUser.username,
+      users: users,
+    });
+  });
+
+  const friendInvites = await prisma.friends.findMany({
+    where: {
+      friendId: id,
+      status: "pending",
+    },
+  });
+
+  const notifications = friendInvites.map((friend) => friend.userId);
+
+  const newNotifications = await prisma.user.findMany({
+    where: {
+      id: {
+        in: [...notifications],
+      },
+    },
+  });
+
+  sockets.forEach((socket) => {
+    socket.emit("newNotification", {
+      users: newNotifications,
+    });
   });
 
   res.status(200).send({ message: "Friend invite sent", users: users });

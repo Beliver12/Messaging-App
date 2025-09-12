@@ -11,7 +11,6 @@
 
 * {
   font-family: "Roboto-VariableFont";
-  
 }
 
 @font-face {
@@ -72,7 +71,8 @@ button:hover {
   }
 }
 
-.list-of-user-to-be-added-as-friends {
+.list-of-user-to-be-added-as-friends,
+.links {
   height: 35vh;
   width: 30vw;
   display: flex;
@@ -81,7 +81,8 @@ button:hover {
   justify-content: space-evenly;
   padding: 0;
   overflow: auto;
-  li {
+  li,
+  a {
     width: 25vw;
     display: flex;
     align-items: center;
@@ -90,7 +91,6 @@ button:hover {
     padding: 5px;
 
     button {
-      
       border: 1px solid goldenrod;
       img {
         width: 2vw;
@@ -271,33 +271,33 @@ textarea {
   resize: none;
 }
 
-.chat-form{
+.chat-form {
   grid-column: 1/3;
   display: flex;
   flex-direction: column;
- justify-content: space-between;
- align-items: center;
- margin-bottom: 10px;
- .chatForm{
-  background-color: rgb(30, 30, 30);
-  display: flex;
-  flex-direction: row;
-  button{
-    height: 133px;
-    width: 10%;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  .chatForm {
+    background-color: rgb(30, 30, 30);
+    display: flex;
+    flex-direction: row;
+    button {
+      height: 133px;
+      width: 10%;
+    }
   }
- }
-  .chat{
+  .chat {
     width: 94vw;
     height: 130px;
     font-size: medium;
     border: 1px solid goldenrod;
   }
-  .send-image{
+  .send-image {
     height: 130px;
     width: 15%;
     color: #1c1c1e;
-    background: url('/sending.png') no-repeat center;
+    background: url("/sending.png") no-repeat center;
     background-size: contain;
   }
 }
@@ -382,7 +382,7 @@ textarea {
       align-items: center;
       justify-content: space-around;
 
-      button{
+      button {
         margin: 5px;
       }
     }

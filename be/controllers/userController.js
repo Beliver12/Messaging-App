@@ -1,5 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const jwt = require("jsonwebtoken");
+const { getIO } = require("../socket");
+
 const databaseUrl =
   process.env.NODE_ENV === "test"
     ? process.env.TEST_DATABASE_URL
@@ -91,6 +93,7 @@ exports.loginUserPost = async (req, res) => {
       email: req.body.email,
     },
   });
+
   const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
   jwt.sign(
     { user },
@@ -157,6 +160,7 @@ exports.checkUserProfilePost = async (req, res) => {
 };
 
 exports.editUserProfile = async (req, res) => {
+  const io = getIO();
   const user = await prisma.user.findUnique({
     where: {
       username: req.body.username,
@@ -201,6 +205,8 @@ exports.editUserProfile = async (req, res) => {
       id: req.user.user.id,
     },
   });
+
+  io.emit("getStatusOfAllUsersInChat");
   res.status(200).send({ message: "Edit successful!", user: editedUser });
 };
 

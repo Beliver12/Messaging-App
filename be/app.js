@@ -1,13 +1,9 @@
 const cors = require("cors");
 require("dotenv").config();
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
-
+const { initSocket } = require("./socket");
 const path = require("node:path");
-const bcrypt = require("bcrypt");
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
 
 const routes = require("./routes");
 
@@ -70,6 +66,8 @@ app.use("/session", routes.session);
 app.use("/users", routes.users);
 app.use("/friends", routes.friends);
 
-app.listen(process.env.PORT, () => {
+const expressServer = app.listen(process.env.PORT, () => {
   console.log(`My first Express app - listening on port ${process.env.PORT}!`);
 });
+
+initSocket(expressServer); // init socket.io once

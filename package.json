@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "prettier": "^3.6.2"
+  },
+  "dependencies": {
+    "socket.io": "^4.8.1"
   }
 }

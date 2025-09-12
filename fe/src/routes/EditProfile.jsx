@@ -123,14 +123,25 @@ export const EditProfile = ({
               onChange={handleFileChange}
             />
             <label> Change Status</label>
-            <select
-              name="status"
-              id="status"
-              onChange={(e) => setIsOnline(e.target.value)}
-            >
-              <option value="true">Online</option>
-              <option value="false">Offline</option>
-            </select>
+            {online === "false" ? (
+              <select
+                name="status"
+                id="status"
+                onChange={(e) => setIsOnline(e.target.value)}
+              >
+                <option value="false">Offline</option>
+                <option value="true">Online</option>
+              </select>
+            ) : (
+              <select
+                name="status"
+                id="status"
+                onChange={(e) => setIsOnline(e.target.value)}
+              >
+                <option value="true">Online</option>
+                <option value="false">Offline</option>
+              </select>
+            )}
             <button type="submit">Submit Changes</button>
           </form>
           <button onClick={closeEditProfile}>Cancel</button>

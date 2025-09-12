@@ -8,6 +8,7 @@ import { verifyToken } from "./routes/verifyToken";
 import { EditProfile } from "./routes/EditProfile";
 import { Notifications } from "./routes/Notification";
 import { Chat } from "./routes/Chat";
+import socket, { joinUserRoom } from "./routes/socket";
 
 import "./App.css";
 
@@ -36,6 +37,10 @@ const LogInForm = ({ user, setUser }) => {
   //EditProfile.jsx
 
   //Notifications.jsx
+  const updatedNotificationLength = localStorage.getItem("notificationsLength");
+  const [notificationsLength, setNotificationLength] = useState(
+    updatedNotificationLength,
+  );
   const [notifications, setNotifications] = useState();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   //Notifications.jsx
@@ -46,10 +51,87 @@ const LogInForm = ({ user, setUser }) => {
   const [chatFormOpen, setChatFormOpen] = useState(false);
   //Chat.jsx
 
+  //socket stuff
+
+  function getNotificationLength() {
+    const token = localStorage.getItem("accessToken");
+    const data = {
+      accessToken: token,
+    };
+
+    const url = `${path}/friends/notifications`;
+    const options = {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(url, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setNotifications(data);
+        setNotificationLength(data.length);
+        localStorage.setItem("notificationsLength", data.length);
+      });
+  }
+
+  function getStatusOfAllUsersInChat() {
+    const token = localStorage.getItem("accessToken");
+    const data = {
+      accessToken: token,
+    };
+
+    const url = `${path}/friends/openChat`;
+    const options = {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(url, options)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        if (data.message === "jwt expired") {
+          verifyToken({ token, setUser, path });
+        }
+        setUsersInChat(data);
+      });
+  }
+
+  useEffect(() => {
+    joinUserRoom(user); // join YOUR room
+    getNotificationLength();
+  }, [user]);
+
+  useEffect(() => {
+    socket.on("newNotification", (user) => {
+      setNotifications(user.users);
+      setNotificationLength(user.users.length);
+      localStorage.setItem("notificationsLength", user.users.length);
+    });
+
+    return () => socket.off("newNotification");
+  }, []);
+
+  useEffect(() => {
+    socket.on("getStatusOfAllUsersInChat", (user) => {
+      getStatusOfAllUsersInChat();
+    });
+
+    return () => socket.off("getStatusOfAllUsersInChat");
+  }, []);
+
+  //socket stuff
+
   const logOut = (event) => {
     event.preventDefault();
     const token = localStorage.getItem("accessToken");
-
+    socket.emit("loged-out", { message: "loged-out" });
     const data = {
       accessToken: token,
     };
@@ -67,6 +149,7 @@ const LogInForm = ({ user, setUser }) => {
       .then((res) => res.json())
       .then((data) => {
         console.log(data.message);
+        socket.emit("loged out", { message: "loged out" });
       });
 
     localStorage.removeItem("accessToken");
@@ -211,6 +294,7 @@ const LogInForm = ({ user, setUser }) => {
           setImage(data.user.image);
           setAbout(data.user.about);
           setOnline(data.user.isOnline);
+          socket.emit("login", data.user.username);
         } else {
           setError(data.error);
         }
@@ -256,74 +340,78 @@ const LogInForm = ({ user, setUser }) => {
             <Link to="signup">Sign Up</Link>
           </form>
         </div>
-        <a
-          href="https://www.flaticon.com/free-icons/mobile-app"
-          title="mobile app icons"
-        >
-          Mobile app icons created by srip - Flaticon
-        </a>
-        <a href="https://imgsearch.com/image/modern-office-collaboration-with-digital-communication-icons-326788">
-          Image by ImgSearch:
-          https://imgsearch.com/image/modern-office-collaboration-with-digital-communication-icons-326788
-        </a>
-        <a
-          href="https://www.flaticon.com/free-icons/writer"
-          title="writer icons"
-        >
-          Writer icons created by SeyfDesigner - Flaticon
-        </a>
-        <a
-          href="https://www.flaticon.com/free-icons/message"
-          title="message icons"
-        >
-          Message icons created by Freepik - Flaticon
-        </a>
-        <a
-          href="https://www.flaticon.com/free-icons/notification"
-          title="notification icons"
-        >
-          Notification icons created by Pixel perfect - Flaticon
-        </a>
-        <a
-          href="https://www.flaticon.com/free-icons/edit-info"
-          title="edit info icons"
-        >
-          Edit info icons created by ZAK - Flaticon
-        </a>
-        <a
-          href="https://www.flaticon.com/free-icons/add-user"
-          title="add user icons"
-        >
-          Add user icons created by Freepik - Flaticon
-        </a>
-        <a
-          href="https://www.flaticon.com/free-icons/logout"
-          title="logout icons"
-        >
-          Logout icons created by Pixel perfect - Flaticon
-        </a>
-        <a
-          href="https://www.flaticon.com/free-icons/reject"
-          title="reject icons"
-        >
-          Reject icons created by Good Ware - Flaticon
-        </a>
-        <a
-          href="https://www.flaticon.com/free-icons/message"
-          title="message icons"
-        >
-          Message icons created by onlyhasbi - Flaticon
-        </a>
-        <a href="https://www.flaticon.com/free-icons/tick" title="tick icons">
-          Tick icons created by kliwir art - Flaticon
-        </a>
-        <a
-          href="https://www.flaticon.com/free-icons/unfriend"
-          title="unfriend icons"
-        >
-          Unfriend icons created by kliwir art - Flaticon
-        </a>
-        <a href="https://www.flaticon.com/free-icons/ui" title="ui icons">Ui icons created by surang - Flaticon</a>
+        <div className="links">
+          <a
+            href="https://www.flaticon.com/free-icons/mobile-app"
+            title="mobile app icons"
+          >
+            Mobile app icons created by srip - Flaticon
+          </a>
+          <a href="https://imgsearch.com/image/modern-office-collaboration-with-digital-communication-icons-326788">
+            Image by ImgSearch:
+            https://imgsearch.com/image/modern-office-collaboration-with-digital-communication-icons-326788
+          </a>
+          <a
+            href="https://www.flaticon.com/free-icons/writer"
+            title="writer icons"
+          >
+            Writer icons created by SeyfDesigner - Flaticon
+          </a>
+          <a
+            href="https://www.flaticon.com/free-icons/message"
+            title="message icons"
+          >
+            Message icons created by Freepik - Flaticon
+          </a>
+          <a
+            href="https://www.flaticon.com/free-icons/notification"
+            title="notification icons"
+          >
+            Notification icons created by Pixel perfect - Flaticon
+          </a>
+          <a
+            href="https://www.flaticon.com/free-icons/edit-info"
+            title="edit info icons"
+          >
+            Edit info icons created by ZAK - Flaticon
+          </a>
+          <a
+            href="https://www.flaticon.com/free-icons/add-user"
+            title="add user icons"
+          >
+            Add user icons created by Freepik - Flaticon
+          </a>
+          <a
+            href="https://www.flaticon.com/free-icons/logout"
+            title="logout icons"
+          >
+            Logout icons created by Pixel perfect - Flaticon
+          </a>
+          <a
+            href="https://www.flaticon.com/free-icons/reject"
+            title="reject icons"
+          >
+            Reject icons created by Good Ware - Flaticon
+          </a>
+          <a
+            href="https://www.flaticon.com/free-icons/message"
+            title="message icons"
+          >
+            Message icons created by onlyhasbi - Flaticon
+          </a>
+          <a href="https://www.flaticon.com/free-icons/tick" title="tick icons">
+            Tick icons created by kliwir art - Flaticon
+          </a>
+          <a
+            href="https://www.flaticon.com/free-icons/unfriend"
+            title="unfriend icons"
+          >
+            Unfriend icons created by kliwir art - Flaticon
+          </a>
+          <a href="https://www.flaticon.com/free-icons/ui" title="ui icons">
+            Ui icons created by surang - Flaticon
+          </a>
+        </div>
       </>
     );
   }
@@ -372,7 +460,8 @@ const LogInForm = ({ user, setUser }) => {
             Open Chat <img src="/chat.png" alt="" />
           </button>
           <button onClick={openNotifications}>
-            Notifications <img src="/active.png" alt="" />
+            Notifications <img src="/active.png" alt="" />{" "}
+            {notificationsLength !== null ? notificationsLength : 0}
           </button>
           <button onClick={editProfile}>
             Edit Profile <img src="/edit-button.png" alt="" />
@@ -414,6 +503,8 @@ const LogInForm = ({ user, setUser }) => {
         setUser={setUser}
         notificationsOpen={notificationsOpen}
         notifications={notifications}
+        notificationsLength={notificationsLength}
+        setNotificationLength={setNotificationLength}
         setNotificationsOpen={setNotificationsOpen}
         setNotifications={setNotifications}
         setUsersInChat={setUsersInChat}
@@ -451,6 +542,10 @@ const LogInForm = ({ user, setUser }) => {
 export const App = () => {
   const userr = localStorage.getItem("user");
   const [user, setUser] = useState(userr);
+  debugger;
+  useEffect(() => {
+    joinUserRoom(userr); // join YOUR room
+  }, [userr]);
 
   return (
     <>

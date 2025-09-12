@@ -9,6 +9,8 @@ export const Notifications = ({
   setNotificationsOpen,
   setNotifications,
   setUsersInChat,
+  notificationsLength,
+  setNotificationLength,
 }) => {
   const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app');
 
@@ -43,6 +45,8 @@ export const Notifications = ({
           verifyToken({ token, setUser, path });
         }
         setNotifications(data);
+        setNotificationLength(data.length);
+        localStorage.setItem("notificationsLength", data.length);
         alert("friend request declined");
       });
   };
@@ -73,6 +77,8 @@ export const Notifications = ({
           verifyToken({ token, setUser });
         }
         setNotifications(data.users);
+        setNotificationLength(data.users.length);
+        localStorage.setItem("notificationsLength", data.users.length);
         setUsersInChat(data.users2);
         alert("friend request accepted");
       });

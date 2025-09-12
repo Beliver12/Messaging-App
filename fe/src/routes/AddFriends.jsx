@@ -2,6 +2,7 @@ import { Link, Navigate } from "react-router";
 import { useState, useEffect } from "react";
 import { verifyToken } from "./verifyToken";
 import { OtherUserProfile } from "./OtherUserProfile";
+import socket, { joinUserRoom } from "./socket";
 
 export const AddFriends = ({
   setUser,
@@ -45,7 +46,19 @@ export const AddFriends = ({
         setOtherUserProfileOpen(true);
       });
   };
+  useEffect(() => {
+    socket.onAny((event, data) => {
+      console.log("Client received event:", event, data);
+    });
 
+    socket.on("newFriendRequest", (user) => {
+      debugger;
+      alert(`${user.username} sent you a friend request!`);
+      setOtherUsers(user.users);
+    });
+
+    return () => socket.off("newFriendRequest");
+  }, []);
   const addFriend = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("accessToken");

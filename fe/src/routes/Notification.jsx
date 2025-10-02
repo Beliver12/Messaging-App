@@ -9,6 +9,7 @@ export const Notifications = ({
   setNotificationsOpen,
   setNotifications,
   setUsersInChat,
+  setChatId,
   notificationsLength,
   setNotificationLength,
 }) => {
@@ -80,6 +81,7 @@ export const Notifications = ({
         setNotificationLength(data.users.length);
         localStorage.setItem("notificationsLength", data.users.length);
         setUsersInChat(data.users2);
+        setChatId(data.chatId);
         alert("friend request accepted");
       });
   };

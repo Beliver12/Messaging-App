@@ -2,7 +2,8 @@ import { Link, Navigate } from "react-router";
 import { useState, useEffect } from "react";
 import { verifyToken } from "./verifyToken";
 import { OtherUserProfile } from "./OtherUserProfile";
-import socket, { joinUserRoom } from "./socket";
+import { connectSocket, getSocket } from "./socket";
+
 
 export const AddFriends = ({
   setUser,
@@ -46,19 +47,7 @@ export const AddFriends = ({
         setOtherUserProfileOpen(true);
       });
   };
-  useEffect(() => {
-    socket.onAny((event, data) => {
-      console.log("Client received event:", event, data);
-    });
-
-    socket.on("newFriendRequest", (user) => {
-      debugger;
-      alert(`${user.username} sent you a friend request!`);
-      setOtherUsers(user.users);
-    });
-
-    return () => socket.off("newFriendRequest");
-  }, []);
+  
   const addFriend = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("accessToken");
@@ -108,7 +97,7 @@ export const AddFriends = ({
                       src={`${path}/images/${user.image}`}
                       alt=""
                       style={{
-                        borderWidth: 4,
+                        borderWidth: 3,
                         borderColor: "green",
                         borderStyle: "solid",
                       }}
@@ -120,7 +109,7 @@ export const AddFriends = ({
                       src={`${path}/images/${user.image}`}
                       alt=""
                       style={{
-                        borderWidth: 4,
+                        borderWidth: 3,
                         borderColor: "red",
                         borderStyle: "solid",
                       }}

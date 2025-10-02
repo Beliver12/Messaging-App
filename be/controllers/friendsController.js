@@ -114,6 +114,7 @@ exports.notificationPost = async (req, res) => {
 };
 
 exports.declineFriendRequestPost = async (req, res) => {
+  
   const id = Number(req.body.id);
   await prisma.friends.deleteMany({
     where: {
@@ -138,13 +139,19 @@ exports.declineFriendRequestPost = async (req, res) => {
       },
     },
   });
-
+ 
   return res.send(users);
 };
 
 exports.acceptFriendRequest = async (req, res) => {
+  const io = getIO();
   const id = Number(req.body.id);
-  await prisma.friends.updateMany({
+
+ const chat = await prisma.chat.create()
+
+
+
+const friendsGroupId =  await prisma.friends.updateManyAndReturn({
     where: {
       userId: id,
       friendId: req.user.user.id,
@@ -153,6 +160,13 @@ exports.acceptFriendRequest = async (req, res) => {
       status: "friends",
     },
   });
+
+  await prisma.usersInChat.create({
+    data:{
+     chatId: chat.id,
+     friendsId: friendsGroupId[0].id
+    }
+})
 
   const friendInvites = await prisma.friends.findMany({
     where: {
@@ -204,7 +218,11 @@ exports.acceptFriendRequest = async (req, res) => {
     },
   });
 
-  res.send({ users: users, users2: users2 });
+
+  io.emit("getStatusOfAllUsersInChat");
+  
+ 
+  res.send({ users: users, users2: users2});
 };
 
 exports.openChat = async (req, res) => {
@@ -240,11 +258,55 @@ exports.openChat = async (req, res) => {
       ],
     },
   });
-
+  
   return res.send(users);
 };
 
 exports.removeFriend = async (req, res) => {
+  const io = getIO();
+
+  const friendId = await prisma.friends.findFirst({
+    where: {
+      OR: [
+        {
+          userId: req.user.user.id,
+          friendId: Number(req.body.friendId),
+          status: "friends",
+        },
+        {
+          friendId: req.user.user.id,
+          userId: Number(req.body.friendId),
+          status: "friends",
+        },
+      ],
+    },
+  });
+
+  const chat = await prisma.usersInChat.findFirst({
+    where: {
+        friendsId: friendId.id
+      }
+})
+
+await prisma.message.deleteMany({
+  where:{
+    chatId: chat.chatId
+  }
+})
+
+await prisma.usersInChat.deleteMany({
+  where:{
+    chatId: chat.chatId,
+    friendsId: friendId.id
+  }
+})
+
+await prisma.chat.deleteMany({
+  where: {
+    id: chat.chatId
+  }
+})
+
   await prisma.friends.deleteMany({
     where: {
       OR: [
@@ -293,5 +355,24 @@ exports.removeFriend = async (req, res) => {
     },
   });
 
+  const friend = await prisma.user.findUnique({
+    where: { id: Number(req.body.friendId) },
+  });
+
+  const currentUser = await prisma.user.findUnique({
+    where: { id: req.user.user.id },
+  });
+
+  const sockets = await io.in(`user:${friend.username}`).fetchSockets();
+
+  sockets.forEach((socket) => {
+    socket.emit("removeUser", {
+      username: currentUser.username,
+    });
+  });
+
+ 
+  
+ 
   return res.send(users);
 };

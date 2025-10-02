@@ -4,16 +4,20 @@ import { verifyToken } from "./verifyToken";
 import { ChatForm } from "./ChatForm";
 
 export const Chat = ({
-  chatOpen,
-  setChatOpen,
   usersInChat,
   setUsersInChat,
   setUser,
   chatFormOpen,
   setChatFormOpen,
+  setChatId,
+  chatId,
+  user
 }) => {
   const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app');
-
+  const [chat, setChat] = useState();
+  const [userInChat, setUserInChat] = useState();
+  const  [messagesInChat, setMessagesInChat] = useState();
+  
   const removeUser = (e) => {
     e.preventDefault();
     let text = "Are you sure you want to remove this user from friends.";
@@ -47,11 +51,34 @@ export const Chat = ({
 
   const openChatForm = (e) => {
     e.preventDefault();
-    setChatFormOpen(true);
+    const token = localStorage.getItem("accessToken");
+
+    const data = {
+      friendId: e.target.id,
+      accessToken: token,
+    };
+    const url = `${path}/chat`;
+    const options = {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(url, options)
+      .then((res) => res.json())
+      .then((data) => {
+        setChat(data.chat)
+        setUserInChat(data.userInChat)
+        setChatFormOpen(true);
+        setMessagesInChat(data.messages)
+      });
+    
     document.querySelector(".sidebar").style.display = "none";
+    document.querySelector(".welcome").style.display = "none";
   };
 
-  if (chatOpen) {
     return (
       <div className="main">
         <div className="sidebar">
@@ -106,10 +133,30 @@ export const Chat = ({
         <ChatForm
           chatFormOpen={chatFormOpen}
           setChatFormOpen={setChatFormOpen}
+          chat={chat}
+          userInChat={userInChat}
+          setMessagesInChat={setMessagesInChat}
+          messagesInChat={messagesInChat}
+          user={user}
         />
+         <div className="welcome">
+        <div className="flex flex-col items-center justify-center h-full text-white text-center p-6">
+          <div className="max-w-md border border-yellow-500 rounded-2xl p-6 bg-[#1e1e1e] shadow-md">
+            <h2 className="text-3xl font-semibold mb-4">👋 Welcome, {user}!</h2>
+            <p className="mb-2">
+              Start chatting with your friends using the sidebar.
+            </p>
+            <ul className="text-left mt-4 space-y-2">
+              <li>
+                ➤ Click <strong  style={{   color: 'lightblue' }}>“➤”</strong> to view your messages
+              </li>
+              <li>➤ Add friends to expand your network</li>
+              <li>➤ Stay connected and chat in real time!</li>
+            </ul>
+          </div>
+        </div>
+      </div>
       </div>
     );
-  } else {
-    return;
-  }
+ 
 };

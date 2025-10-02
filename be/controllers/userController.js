@@ -65,6 +65,7 @@ exports.signupUserPost = async (req, res) => {
 };
 
 exports.loginUserPost = async (req, res) => {
+  const io = getIO();
   let user = await prisma.user.findUnique({
     where: {
       email: req.body.email,
@@ -94,6 +95,8 @@ exports.loginUserPost = async (req, res) => {
     },
   });
 
+
+
   const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
   jwt.sign(
     { user },
@@ -110,6 +113,8 @@ exports.loginUserPost = async (req, res) => {
 };
 
 exports.logOut = async (req, res) => {
+
+  
   await prisma.user.update({
     where: {
       id: req.user.user.id,

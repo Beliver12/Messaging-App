@@ -22,7 +22,8 @@ model User {
   about    String 
   isOnline String?
   image    String?
-   Friends Friends[]
+  Friends Friends[]
+  Message Message[]
 }
 
 model Friends {
@@ -31,4 +32,31 @@ model Friends {
   User     User      @relation(fields: [userId], references: [id])
   userId   Int
   status   String?
+  UsersInChat UsersInChat[]
+}
+
+model Chat {
+  id       Int    @id @default(autoincrement())
+  Message  Message[]
+  UsersInChat UsersInChat[]
+}
+
+model Message {
+  id       Int    @id @default(autoincrement())
+  message  String?
+  image    String?
+  date     String
+  username String
+  Chat     Chat   @relation(fields: [chatId], references: [id])
+  User     User   @relation(fields: [userId], references: [id])
+  chatId   Int
+  userId   Int
+}
+
+model UsersInChat {
+  id       Int    @id @default(autoincrement())
+  Friends  Friends   @relation(fields: [friendsId], references: [id])
+  Chat     Chat   @relation(fields: [chatId], references: [id])
+  chatId   Int
+  friendsId   Int
 }

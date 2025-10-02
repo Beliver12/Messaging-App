@@ -18,6 +18,7 @@ export const EditProfile = ({
   const [isEdited, setIsEdited] = useState("");
   const [error, setError] = useState("");
   const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app');
+  
   const handleEdit = async (e) => {
     e.preventDefault();
     const accessToken = localStorage.getItem("accessToken");

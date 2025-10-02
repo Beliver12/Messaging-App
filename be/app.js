@@ -65,6 +65,7 @@ app.use(bodyParser.json());
 app.use("/session", routes.session);
 app.use("/users", routes.users);
 app.use("/friends", routes.friends);
+app.use("/chat", routes.chat)
 
 const expressServer = app.listen(process.env.PORT, () => {
   console.log(`My first Express app - listening on port ${process.env.PORT}!`);

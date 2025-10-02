@@ -8,7 +8,8 @@ import { verifyToken } from "./routes/verifyToken";
 import { EditProfile } from "./routes/EditProfile";
 import { Notifications } from "./routes/Notification";
 import { Chat } from "./routes/Chat";
-import socket, { joinUserRoom } from "./routes/socket";
+import { connectSocket, getSocket } from "./routes/socket";
+
 
 import "./App.css";
 
@@ -47,7 +48,7 @@ const LogInForm = ({ user, setUser }) => {
 
   //Chat.jsx
   const [usersInChat, setUsersInChat] = useState();
-  const [chatOpen, setChatOpen] = useState(false);
+  const  [chatId, setChatId] = useState();
   const [chatFormOpen, setChatFormOpen] = useState(false);
   //Chat.jsx
 
@@ -96,19 +97,41 @@ const LogInForm = ({ user, setUser }) => {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
-        if (data.message === "jwt expired") {
-          verifyToken({ token, setUser, path });
-        }
+       
         setUsersInChat(data);
       });
   }
 
+
   useEffect(() => {
-    joinUserRoom(user); // join YOUR room
+    debugger
+    //joinUserRoom(user); // join YOUR room
     getNotificationLength();
+    if(user){
+    getStatusOfAllUsersInChat()
+    }
   }, [user]);
 
   useEffect(() => {
+   const socket = getSocket();
+   if(!socket) return
+    socket.on("removeUser", (user) => {
+      debugger;
+      alert(`${user.username} removed you from friends!`);
+      getStatusOfAllUsersInChat();
+      setChatFormOpen(false);
+      document.querySelector(".sidebar").style.display = "block";
+      document.querySelector(".welcome").style.display = "flex";
+    });
+
+    return () => socket.off("removeUser");
+  }, []);
+
+
+  useEffect(() => {
+    const socket = getSocket();
+   if(!socket) return
+
     socket.on("newNotification", (user) => {
       setNotifications(user.users);
       setNotificationLength(user.users.length);
@@ -119,19 +142,39 @@ const LogInForm = ({ user, setUser }) => {
   }, []);
 
   useEffect(() => {
-    socket.on("getStatusOfAllUsersInChat", (user) => {
+    const socket = getSocket();
+   if(!socket) return
+    socket.on("getStatusOfAllUsersInChat", () => {
       getStatusOfAllUsersInChat();
     });
 
     return () => socket.off("getStatusOfAllUsersInChat");
   }, []);
 
+  useEffect(() => {
+    const socket = getSocket();
+    if(!socket) return
+    socket.onAny((event, data) => {
+      console.log("Client received event:", event, data);
+    });
+
+    socket.on("newFriendRequest", (user) => {
+      debugger;
+      alert(`${user.username} sent you a friend request!`);
+      setOtherUsers(user.users);
+    });
+
+    return () => socket.off("newFriendRequest");
+  }, []);
   //socket stuff
 
   const logOut = (event) => {
+    const socket = getSocket();
     event.preventDefault();
     const token = localStorage.getItem("accessToken");
-    socket.emit("loged-out", { message: "loged-out" });
+    
+    socket.emit("loged-out", user);
+    socket.disconnect();
     const data = {
       accessToken: token,
     };
@@ -158,7 +201,6 @@ const LogInForm = ({ user, setUser }) => {
     localStorage.removeItem("about");
     localStorage.removeItem("online");
     setUser("");
-    setChatOpen(false);
   };
 
   const openUserProfile = async (event) => {
@@ -229,40 +271,7 @@ const LogInForm = ({ user, setUser }) => {
       });
   };
 
-  const openChat = async (e) => {
-    e.preventDefault();
-    if (!chatOpen) {
-      const token = localStorage.getItem("accessToken");
-      const data = {
-        accessToken: token,
-      };
 
-      const url = `${path}/friends/openChat`;
-      const options = {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-
-      fetch(url, options)
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-          if (data.message === "jwt expired") {
-            verifyToken({ token, setUser, path });
-          }
-          setUsersInChat(data);
-          setChatOpen(true);
-          document.querySelector(".welcome").style.display = "none";
-        });
-    } else if (chatOpen) {
-      setChatOpen(false);
-      setChatFormOpen(false);
-      document.querySelector(".welcome").style.display = "flex";
-    }
-  };
 
   const logIn = async (event) => {
     event.preventDefault();
@@ -294,7 +303,17 @@ const LogInForm = ({ user, setUser }) => {
           setImage(data.user.image);
           setAbout(data.user.about);
           setOnline(data.user.isOnline);
-          socket.emit("login", data.user.username);
+          setUser(data.user.username);
+
+    // ✅ connect socket after login
+    const socket = connectSocket();
+
+    socket.connect();
+
+      socket.on("connect", () => {
+        console.log("Socket connected:", socket.id);
+        socket.emit("login", data.user.username); // tell server who we are
+      });
         } else {
           setError(data.error);
         }
@@ -340,78 +359,7 @@ const LogInForm = ({ user, setUser }) => {
             <Link to="signup">Sign Up</Link>
           </form>
         </div>
-        <div className="links">
-          <a
-            href="https://www.flaticon.com/free-icons/mobile-app"
-            title="mobile app icons"
-          >
-            Mobile app icons created by srip - Flaticon
-          </a>
-          <a href="https://imgsearch.com/image/modern-office-collaboration-with-digital-communication-icons-326788">
-            Image by ImgSearch:
-            https://imgsearch.com/image/modern-office-collaboration-with-digital-communication-icons-326788
-          </a>
-          <a
-            href="https://www.flaticon.com/free-icons/writer"
-            title="writer icons"
-          >
-            Writer icons created by SeyfDesigner - Flaticon
-          </a>
-          <a
-            href="https://www.flaticon.com/free-icons/message"
-            title="message icons"
-          >
-            Message icons created by Freepik - Flaticon
-          </a>
-          <a
-            href="https://www.flaticon.com/free-icons/notification"
-            title="notification icons"
-          >
-            Notification icons created by Pixel perfect - Flaticon
-          </a>
-          <a
-            href="https://www.flaticon.com/free-icons/edit-info"
-            title="edit info icons"
-          >
-            Edit info icons created by ZAK - Flaticon
-          </a>
-          <a
-            href="https://www.flaticon.com/free-icons/add-user"
-            title="add user icons"
-          >
-            Add user icons created by Freepik - Flaticon
-          </a>
-          <a
-            href="https://www.flaticon.com/free-icons/logout"
-            title="logout icons"
-          >
-            Logout icons created by Pixel perfect - Flaticon
-          </a>
-          <a
-            href="https://www.flaticon.com/free-icons/reject"
-            title="reject icons"
-          >
-            Reject icons created by Good Ware - Flaticon
-          </a>
-          <a
-            href="https://www.flaticon.com/free-icons/message"
-            title="message icons"
-          >
-            Message icons created by onlyhasbi - Flaticon
-          </a>
-          <a href="https://www.flaticon.com/free-icons/tick" title="tick icons">
-            Tick icons created by kliwir art - Flaticon
-          </a>
-          <a
-            href="https://www.flaticon.com/free-icons/unfriend"
-            title="unfriend icons"
-          >
-            Unfriend icons created by kliwir art - Flaticon
-          </a>
-          <a href="https://www.flaticon.com/free-icons/ui" title="ui icons">
-            Ui icons created by surang - Flaticon
-          </a>
-        </div>
+      
       </>
     );
   }
@@ -456,12 +404,12 @@ const LogInForm = ({ user, setUser }) => {
           </div>
         </div>
         <div className="buttons">
-          <button onClick={openChat}>
-            Open Chat <img src="/chat.png" alt="" />
-          </button>
-          <button onClick={openNotifications}>
+        
+          
+          <button className="notification-button"  onClick={openNotifications}>
             Notifications <img src="/active.png" alt="" />{" "}
-            {notificationsLength !== null ? notificationsLength : 0}
+          
+         <div><span> {notificationsLength !== null ? notificationsLength : 0} </span></div> 
           </button>
           <button onClick={editProfile}>
             Edit Profile <img src="/edit-button.png" alt="" />
@@ -508,33 +456,19 @@ const LogInForm = ({ user, setUser }) => {
         setNotificationsOpen={setNotificationsOpen}
         setNotifications={setNotifications}
         setUsersInChat={setUsersInChat}
+        setChatId={setChatId}
       />
       <Chat
+        chatId={chatId}
         usersInChat={usersInChat}
         setUser={setUser}
-        chatOpen={chatOpen}
-        setChatOpen={setChatOpen}
+        user={user}
+        setChatId={setChatId}
         setUsersInChat={setUsersInChat}
         setChatFormOpen={setChatFormOpen}
         chatFormOpen={chatFormOpen}
       />
-      <div className="welcome">
-        <div className="flex flex-col items-center justify-center h-full text-white text-center p-6">
-          <div className="max-w-md border border-yellow-500 rounded-2xl p-6 bg-[#1e1e1e] shadow-md">
-            <h2 className="text-3xl font-semibold mb-4">👋 Welcome, {user}!</h2>
-            <p className="mb-2">
-              Start chatting with your friends using the sidebar.
-            </p>
-            <ul className="text-left mt-4 space-y-2">
-              <li>
-                ➤ Click <strong>“Open Chat”</strong> to view your messages
-              </li>
-              <li>➤ Add friends to expand your network</li>
-              <li>➤ Stay connected and chat in real time!</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+   
     </div>
   );
 };
@@ -544,8 +478,21 @@ export const App = () => {
   const [user, setUser] = useState(userr);
   debugger;
   useEffect(() => {
-    joinUserRoom(userr); // join YOUR room
-  }, [userr]);
+    if (!user) return;
+
+    const socket = connectSocket();
+    socket.connect();
+
+    socket.once("connect", () => {
+      console.log("Socket connected:", socket.id);
+      socket.emit("login", user); // join room
+    });
+
+    return () => {
+      socket.off("connect");
+    };
+  }, [user]);
+
 
   return (
     <>

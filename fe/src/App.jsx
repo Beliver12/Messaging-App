@@ -106,7 +106,9 @@ const LogInForm = ({ user, setUser }) => {
 
 
 
-
+window.addEventListener("load", (event) => {
+  getStatusOfAllUsersInChat() 
+})
 
   useEffect(() => {
     socket.onAny((event, data) => {

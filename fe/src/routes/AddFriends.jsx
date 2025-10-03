@@ -2,7 +2,7 @@ import { Link, Navigate } from "react-router";
 import { useState, useEffect } from "react";
 import { verifyToken } from "./verifyToken";
 import { OtherUserProfile } from "./OtherUserProfile";
-import { connectSocket, getSocket } from "./socket";
+
 
 
 export const AddFriends = ({

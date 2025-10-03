@@ -65,7 +65,6 @@ exports.signupUserPost = async (req, res) => {
 };
 
 exports.loginUserPost = async (req, res) => {
-  const io = getIO();
   let user = await prisma.user.findUnique({
     where: {
       email: req.body.email,

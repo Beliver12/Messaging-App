@@ -1,6 +1,6 @@
+
 import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+
 import { Link } from "react-router";
 import { UserProfile } from "./routes/UserProfile";
 import { AddFriends } from "./routes/AddFriends";
@@ -8,7 +8,7 @@ import { verifyToken } from "./routes/verifyToken";
 import { EditProfile } from "./routes/EditProfile";
 import { Notifications } from "./routes/Notification";
 import { Chat } from "./routes/Chat";
-import { connectSocket, getSocket } from "./routes/socket";
+import socket, { joinUserRoom } from "./routes/socket";
 
 
 import "./App.css";
@@ -53,6 +53,8 @@ const LogInForm = ({ user, setUser }) => {
   //Chat.jsx
 
   //socket stuff
+
+
 
   function getNotificationLength() {
     const token = localStorage.getItem("accessToken");
@@ -103,57 +105,10 @@ const LogInForm = ({ user, setUser }) => {
   }
 
 
-  useEffect(() => {
-    debugger
-    //joinUserRoom(user); // join YOUR room
-    getNotificationLength();
-    if(user){
-    getStatusOfAllUsersInChat()
-    }
-  }, [user]);
 
-  useEffect(() => {
-   const socket = getSocket();
-   if(!socket) return
-    socket.on("removeUser", (user) => {
-      debugger;
-      alert(`${user.username} removed you from friends!`);
-      getStatusOfAllUsersInChat();
-      setChatFormOpen(false);
-      document.querySelector(".sidebar").style.display = "block";
-      document.querySelector(".welcome").style.display = "flex";
-    });
-
-    return () => socket.off("removeUser");
-  }, []);
 
 
   useEffect(() => {
-    const socket = getSocket();
-   if(!socket) return
-
-    socket.on("newNotification", (user) => {
-      setNotifications(user.users);
-      setNotificationLength(user.users.length);
-      localStorage.setItem("notificationsLength", user.users.length);
-    });
-
-    return () => socket.off("newNotification");
-  }, []);
-
-  useEffect(() => {
-    const socket = getSocket();
-   if(!socket) return
-    socket.on("getStatusOfAllUsersInChat", () => {
-      getStatusOfAllUsersInChat();
-    });
-
-    return () => socket.off("getStatusOfAllUsersInChat");
-  }, []);
-
-  useEffect(() => {
-    const socket = getSocket();
-    if(!socket) return
     socket.onAny((event, data) => {
       console.log("Client received event:", event, data);
     });
@@ -166,15 +121,46 @@ const LogInForm = ({ user, setUser }) => {
 
     return () => socket.off("newFriendRequest");
   }, []);
+
+  useEffect(() => {
+    socket.on("removeUser", (user) => {
+    getStatusOfAllUsersInChat();
+    alert(`${user.username} removed you from friends`);
+    });
+
+    return () => socket.off("newNotification");
+  }, []);
+
+  useEffect(() => {
+    joinUserRoom(user); // join YOUR room
+    getNotificationLength();
+  }, [user]);
+
+  useEffect(() => {
+    socket.on("newNotification", (user) => {
+      setNotifications(user.users);
+      setNotificationLength(user.users.length);
+      localStorage.setItem("notificationsLength", user.users.length);
+    });
+
+    return () => socket.off("newNotification");
+  }, []);
+
+  useEffect(() => {
+    socket.on("getStatusOfAllUsersInChat", (user) => {
+      getStatusOfAllUsersInChat();
+    });
+
+    return () => socket.off("getStatusOfAllUsersInChat");
+  }, []);
+
+    
   //socket stuff
 
   const logOut = (event) => {
-    const socket = getSocket();
     event.preventDefault();
     const token = localStorage.getItem("accessToken");
     
-    socket.emit("loged-out", user);
-    socket.disconnect();
     const data = {
       accessToken: token,
     };
@@ -303,21 +289,15 @@ const LogInForm = ({ user, setUser }) => {
           setImage(data.user.image);
           setAbout(data.user.about);
           setOnline(data.user.isOnline);
-          setUser(data.user.username);
-
-    // ✅ connect socket after login
-    const socket = connectSocket();
-
-    socket.connect();
-
-      socket.on("connect", () => {
-        console.log("Socket connected:", socket.id);
-        socket.emit("login", data.user.username); // tell server who we are
-      });
+         // socket = io("http://localhost:8080");
+          socket.on("connect", () => {
+            socket.emit("join_room", data.user.username);
+          });
         } else {
           setError(data.error);
         }
       });
+      
   };
 
   const editProfile = (e) => {
@@ -354,9 +334,9 @@ const LogInForm = ({ user, setUser }) => {
               maxLength="20"
               onChange={(e) => setPassword(e.target.value)}
             />
-            <button type="submit">Log In</button>
+            <button  type="submit">Log In</button>
             <p>Dont have account?</p>
-            <Link to="signup">Sign Up</Link>
+            <Link  to="signup">Sign Up</Link>
           </form>
         </div>
       
@@ -420,6 +400,7 @@ const LogInForm = ({ user, setUser }) => {
           <button onClick={logOut}>
             Log Out <img src="logout.png" alt="" />
           </button>
+        
         </div>
       </div>
       <AddFriends
@@ -478,20 +459,9 @@ export const App = () => {
   const [user, setUser] = useState(userr);
   debugger;
   useEffect(() => {
-    if (!user) return;
+    joinUserRoom(userr); // join YOUR room
+  }, [userr]);
 
-    const socket = connectSocket();
-    socket.connect();
-
-    socket.once("connect", () => {
-      console.log("Socket connected:", socket.id);
-      socket.emit("login", user); // join room
-    });
-
-    return () => {
-      socket.off("connect");
-    };
-  }, [user]);
 
 
   return (

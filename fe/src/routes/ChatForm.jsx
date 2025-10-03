@@ -45,8 +45,15 @@ export const ChatForm = ({ chatFormOpen, setChatFormOpen, chat, userInChat, mess
         if (!data.error) {
           setMessagesInChat(data)
           setMessage("");
-        } else {
+        } 
+        if(data.error === "cant send empty message"){
           return false
+        }
+        if(data.error === "this chat doesnt exist anymore because user removed you from friends"){
+          setChatFormOpen(false)
+          document.querySelector(".sidebar").style.display = "block";
+          document.querySelector(".welcome").style.display = "flex";
+          alert("this chat doesnt exist anymore because user removed you from friends")
         }
       });
      

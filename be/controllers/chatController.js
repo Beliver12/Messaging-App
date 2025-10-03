@@ -58,6 +58,18 @@ exports.startChat = async (req, res) => {
 
 exports.sendMessage = async (req, res) => {
 const date = new Date().toLocaleString()
+
+ const chat = await prisma.chat.findMany({
+  where: {
+    id: Number(req.body.chatId)
+  }
+ })
+if(chat) {
+  return res.status(400).send({
+    error: "this chat doesnt exist anymore because user removed you from friends",
+  });
+}
+
 if(!req.file && !req.body.message) {
   return res.status(400).send({
     error: "cant send empty message",

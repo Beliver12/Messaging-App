@@ -12,18 +12,18 @@ function initSocket(expressServer) {
   io.on("connection", (socket) => {
     console.log(`a user connected ${socket.id}`);
 
-    socket.on("login", (username) => {
-      socket.join(`user:${username}`);
-      console.log(`User ${username} joined room user:${username}`);
+    socket.on("login", (userId) => {
+      socket.join(`user:${userId}`);
+      console.log(`User ${userId} joined room user:${userId}`);
     });
 
     socket.on("disconnect", () => {
       console.log(`a user disconnected ${socket.id}`);
     });
-   
+    socket.on("loged-out", (data) => {
+      socket.broadcast.emit("loged-out", data);
+    });
   });
-
-
 
   return io;
 }

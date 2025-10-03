@@ -1,16 +1,10 @@
-// routes/socket.js
 import { io } from "socket.io-client";
 
-let socket;
+const socket = io.connect('https://messaging-app-messaging-app-livee.up.railway.app');
 
-export const connectSocket = () => {
-  if (!socket) {
-    socket = io('https://messaging-app-messaging-app-livee.up.railway.app', {
-      autoConnect: false, // don’t connect immediately
-    });
-    socket.connect(); // connect when you decide (e.g., after login)
-  }
-  return socket;
-};
+export function joinUserRoom(userId) {
+  if (!userId) return;
+  socket.emit("login", userId); // ✅ client tells server to join room
+}
 
-export const getSocket = () => socket;
+export default socket;

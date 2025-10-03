@@ -64,7 +64,7 @@ const date = new Date().toLocaleString()
     id: Number(req.body.chatId)
   }
  })
-if(chat) {
+if(!chat) {
   return res.status(400).send({
     error: "this chat doesnt exist anymore because user removed you from friends",
   });

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 
 import { Link } from "react-router";
@@ -10,10 +9,9 @@ import { Notifications } from "./routes/Notification";
 import { Chat } from "./routes/Chat";
 import socket, { joinUserRoom } from "./routes/socket";
 
-
 import "./App.css";
 
-const LogInForm = ({ user, setUser }) => {
+export const LogInForm = ({ user, setUser }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const profileImage = localStorage.getItem("image");
@@ -48,13 +46,11 @@ const LogInForm = ({ user, setUser }) => {
 
   //Chat.jsx
   const [usersInChat, setUsersInChat] = useState();
-  const  [chatId, setChatId] = useState();
+  const [chatId, setChatId] = useState();
   const [chatFormOpen, setChatFormOpen] = useState(false);
   //Chat.jsx
 
   //socket stuff
-
-
 
   function getNotificationLength() {
     const token = localStorage.getItem("accessToken");
@@ -99,16 +95,17 @@ const LogInForm = ({ user, setUser }) => {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
-       
+
         setUsersInChat(data);
       });
   }
 
-
-
-window.addEventListener("load", (event) => {
-  getStatusOfAllUsersInChat() 
-})
+  useEffect(() => {
+    if (user) {
+      getStatusOfAllUsersInChat();
+      getNotificationLength();
+    }
+  }, [user]);
 
   useEffect(() => {
     socket.onAny((event, data) => {
@@ -116,9 +113,9 @@ window.addEventListener("load", (event) => {
     });
 
     socket.on("newFriendRequest", (user) => {
-      debugger;
       alert(`${user.username} sent you a friend request!`);
       setOtherUsers(user.users);
+      console.log(socket.listeners("newFriendRequest").length);
     });
 
     return () => socket.off("newFriendRequest");
@@ -126,16 +123,16 @@ window.addEventListener("load", (event) => {
 
   useEffect(() => {
     socket.on("removeUser", (user) => {
-    getStatusOfAllUsersInChat();
-    alert(`${user.username} removed you from friends`);
+      getStatusOfAllUsersInChat();
+      alert(`${user.username} removed you from friends`);
+      console.log(socket.listeners("removeUser").length);
     });
 
-    return () => socket.off("newNotification");
+    return () => socket.off("removeUser");
   }, []);
 
   useEffect(() => {
     joinUserRoom(user); // join YOUR room
-    getNotificationLength();
   }, [user]);
 
   useEffect(() => {
@@ -155,14 +152,14 @@ window.addEventListener("load", (event) => {
 
     return () => socket.off("getStatusOfAllUsersInChat");
   }, []);
+  
 
-    
   //socket stuff
 
   const logOut = (event) => {
     event.preventDefault();
     const token = localStorage.getItem("accessToken");
-    
+
     const data = {
       accessToken: token,
     };
@@ -180,7 +177,7 @@ window.addEventListener("load", (event) => {
       .then((res) => res.json())
       .then((data) => {
         console.log(data.message);
-        socket.emit("loged out", { message: "loged out" });
+        socket.emit("loged-out", { message: "loged out" });
       });
 
     localStorage.removeItem("accessToken");
@@ -259,8 +256,6 @@ window.addEventListener("load", (event) => {
       });
   };
 
-
-
   const logIn = async (event) => {
     event.preventDefault();
     const data = {
@@ -291,15 +286,14 @@ window.addEventListener("load", (event) => {
           setImage(data.user.image);
           setAbout(data.user.about);
           setOnline(data.user.isOnline);
-         // socket = io("http://localhost:8080");
+          getStatusOfAllUsersInChat();
           socket.on("connect", () => {
-            socket.emit("join_room", data.user.username);
+            socket.emit("login", data.user.username);
           });
         } else {
           setError(data.error);
         }
       });
-      
   };
 
   const editProfile = (e) => {
@@ -336,12 +330,11 @@ window.addEventListener("load", (event) => {
               maxLength="20"
               onChange={(e) => setPassword(e.target.value)}
             />
-            <button  type="submit">Log In</button>
+            <button type="submit">Log In</button>
             <p>Dont have account?</p>
-            <Link  to="signup">Sign Up</Link>
+            <Link to="signup">Sign Up</Link>
           </form>
         </div>
-      
       </>
     );
   }
@@ -358,9 +351,7 @@ window.addEventListener("load", (event) => {
               src={`${path}/images/${image}`}
               alt=""
               style={{
-                borderWidth: 4,
                 borderColor: "green",
-                borderStyle: "solid",
               }}
             />
           ) : (
@@ -369,9 +360,7 @@ window.addEventListener("load", (event) => {
               src={`${path}/images/${image}`}
               alt=""
               style={{
-                borderWidth: 4,
                 borderColor: "red",
-                borderStyle: "solid",
               }}
             />
           )}
@@ -386,12 +375,14 @@ window.addEventListener("load", (event) => {
           </div>
         </div>
         <div className="buttons">
-        
-          
-          <button className="notification-button"  onClick={openNotifications}>
+          <button className="notification-button" onClick={openNotifications}>
             Notifications <img src="/active.png" alt="" />{" "}
-          
-         <div><span> {notificationsLength !== null ? notificationsLength : 0} </span></div> 
+            <div>
+              <span>
+                {" "}
+                {notificationsLength !== null ? notificationsLength : 0}{" "}
+              </span>
+            </div>
           </button>
           <button onClick={editProfile}>
             Edit Profile <img src="/edit-button.png" alt="" />
@@ -402,7 +393,6 @@ window.addEventListener("load", (event) => {
           <button onClick={logOut}>
             Log Out <img src="logout.png" alt="" />
           </button>
-        
         </div>
       </div>
       <AddFriends
@@ -429,6 +419,7 @@ window.addEventListener("load", (event) => {
         setAbout={setAbout}
         setImage={setImage}
         setOnline={setOnline}
+        setChatFormOpen={setChatFormOpen}
       />
       <Notifications
         setUser={setUser}
@@ -451,7 +442,6 @@ window.addEventListener("load", (event) => {
         setChatFormOpen={setChatFormOpen}
         chatFormOpen={chatFormOpen}
       />
-   
     </div>
   );
 };
@@ -459,12 +449,10 @@ window.addEventListener("load", (event) => {
 export const App = () => {
   const userr = localStorage.getItem("user");
   const [user, setUser] = useState(userr);
-  debugger;
+
   useEffect(() => {
     joinUserRoom(userr); // join YOUR room
   }, [userr]);
-
-
 
   return (
     <>

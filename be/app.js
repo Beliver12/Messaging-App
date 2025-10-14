@@ -51,7 +51,6 @@ app.use(function (req, res, next) {
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -59,13 +58,14 @@ app.use(bodyParser.json());
 /*app.use(
   cors({
     origin: "http://localhost:5173", // Replace with your frontend URL
+    credentials: true,
   }),
 );*/
 
 app.use("/session", routes.session);
 app.use("/users", routes.users);
 app.use("/friends", routes.friends);
-app.use("/chat", routes.chat)
+app.use("/chat", routes.chat);
 
 const expressServer = app.listen(process.env.PORT, () => {
   console.log(`My first Express app - listening on port ${process.env.PORT}!`);

@@ -10,6 +10,7 @@ export const EditProfile = ({
   setAbout,
   setImage,
   setOnline,
+  setChatFormOpen,
 }) => {
   const [username, setUsername] = useState(user);
   const [editedAbout, setEditedAbout] = useState(about);
@@ -18,7 +19,7 @@ export const EditProfile = ({
   const [isEdited, setIsEdited] = useState("");
   const [error, setError] = useState("");
   const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app');
-  
+
   const handleEdit = async (e) => {
     e.preventDefault();
     const accessToken = localStorage.getItem("accessToken");
@@ -53,6 +54,9 @@ export const EditProfile = ({
           setOnline(data.user.isOnline);
           setEditProfileOpen(false);
           setError("");
+          setChatFormOpen(false);
+          document.querySelector(".sidebar").style.display = "block";
+          document.querySelector(".welcome").style.display = "flex";
         } else {
           setError(data.error);
         }

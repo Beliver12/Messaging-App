@@ -3,8 +3,6 @@ import { useState, useEffect } from "react";
 import { verifyToken } from "./verifyToken";
 import { OtherUserProfile } from "./OtherUserProfile";
 
-
-
 export const AddFriends = ({
   setUser,
   addFriendsOpen,
@@ -47,7 +45,7 @@ export const AddFriends = ({
         setOtherUserProfileOpen(true);
       });
   };
-  
+
   const addFriend = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("accessToken");
@@ -97,9 +95,7 @@ export const AddFriends = ({
                       src={`${path}/images/${user.image}`}
                       alt=""
                       style={{
-                        borderWidth: 3,
                         borderColor: "green",
-                        borderStyle: "solid",
                       }}
                     />
                   ) : (
@@ -109,9 +105,7 @@ export const AddFriends = ({
                       src={`${path}/images/${user.image}`}
                       alt=""
                       style={{
-                        borderWidth: 3,
                         borderColor: "red",
-                        borderStyle: "solid",
                       }}
                     />
                   )}

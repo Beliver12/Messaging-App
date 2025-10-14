@@ -114,7 +114,6 @@ exports.notificationPost = async (req, res) => {
 };
 
 exports.declineFriendRequestPost = async (req, res) => {
-  
   const id = Number(req.body.id);
   await prisma.friends.deleteMany({
     where: {
@@ -139,7 +138,7 @@ exports.declineFriendRequestPost = async (req, res) => {
       },
     },
   });
- 
+
   return res.send(users);
 };
 
@@ -147,11 +146,9 @@ exports.acceptFriendRequest = async (req, res) => {
   const io = getIO();
   const id = Number(req.body.id);
 
- const chat = await prisma.chat.create()
+  const chat = await prisma.chat.create();
 
-
-
-const friendsGroupId =  await prisma.friends.updateManyAndReturn({
+  const friendsGroupId = await prisma.friends.updateManyAndReturn({
     where: {
       userId: id,
       friendId: req.user.user.id,
@@ -162,11 +159,11 @@ const friendsGroupId =  await prisma.friends.updateManyAndReturn({
   });
 
   await prisma.usersInChat.create({
-    data:{
-     chatId: chat.id,
-     friendsId: friendsGroupId[0].id
-    }
-})
+    data: {
+      chatId: chat.id,
+      friendsId: friendsGroupId[0].id,
+    },
+  });
 
   const friendInvites = await prisma.friends.findMany({
     where: {
@@ -218,11 +215,9 @@ const friendsGroupId =  await prisma.friends.updateManyAndReturn({
     },
   });
 
-
   io.emit("getStatusOfAllUsersInChat");
-  
- 
-  res.send({ users: users, users2: users2});
+
+  res.send({ users: users, users2: users2 });
 };
 
 exports.openChat = async (req, res) => {
@@ -258,7 +253,7 @@ exports.openChat = async (req, res) => {
       ],
     },
   });
-  
+
   return res.send(users);
 };
 
@@ -284,28 +279,31 @@ exports.removeFriend = async (req, res) => {
 
   const chat = await prisma.usersInChat.findFirst({
     where: {
-        friendsId: friendId.id
-      }
-})
+      friendsId: friendId.id,
+    },
+  });
 
-await prisma.message.deleteMany({
-  where:{
-    chatId: chat.chatId
-  }
-})
+  await Promise.all([
+    prisma.message.deleteMany({
+      where: {
+        chatId: chat.chatId,
+      },
+    }),
 
-await prisma.usersInChat.deleteMany({
-  where:{
-    chatId: chat.chatId,
-    friendsId: friendId.id
-  }
-})
+    prisma.usersInChat.deleteMany({
+      where: {
+        chatId: chat.chatId,
+        friendsId: friendId.id,
+      },
+    }),
+  ]);
 
-await prisma.chat.deleteMany({
-  where: {
-    id: chat.chatId
-  }
-})
+
+  await prisma.chat.deleteMany({
+    where: {
+      id: chat.chatId,
+    },
+  });
 
   await prisma.friends.deleteMany({
     where: {
@@ -355,13 +353,15 @@ await prisma.chat.deleteMany({
     },
   });
 
-  const friend = await prisma.user.findUnique({
-    where: { id: Number(req.body.friendId) },
-  });
+  const [friend, currentUser] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: Number(req.body.friendId) },
+    }),
 
-  const currentUser = await prisma.user.findUnique({
-    where: { id: req.user.user.id },
-  });
+    prisma.user.findUnique({
+      where: { id: req.user.user.id },
+    }),
+  ]);
 
   const sockets = await io.in(`user:${friend.username}`).fetchSockets();
 
@@ -371,8 +371,5 @@ await prisma.chat.deleteMany({
     });
   });
 
- 
-  
- 
   return res.send(users);
 };

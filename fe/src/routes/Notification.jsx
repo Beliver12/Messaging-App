@@ -104,12 +104,22 @@ export const Notifications = ({
                     alt=""
                   />
                   {user.username}
-                  <button id={user.id} onClick={acceptFriendRequest}>
-                    <img id={user.id} src="/accept.png" alt="" />
-                  </button>
-                  <button id={user.id} onClick={declineFriendRequest}>
-                    <img id={user.id} src="/remove.png" alt="" />
-                  </button>
+
+                  <img
+                    onClick={acceptFriendRequest}
+                    id={user.id}
+                    className="accept-friend-request"
+                    src="/accept.png"
+                    alt=""
+                  />
+
+                  <img
+                    onClick={declineFriendRequest}
+                    id={user.id}
+                    className="decline-friend-request"
+                    src="/remove.png"
+                    alt=""
+                  />
                 </li>
               ))}
           </ul>

@@ -2,7 +2,7 @@ const { Router } = require("express");
 const router = Router();
 
 const verify = require("../controllers/verifyToken");
-const chatController = require("../controllers/chatController")
+const chatController = require("../controllers/chatController");
 
 const multer = require("multer");
 
@@ -19,7 +19,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post('/',verify.verifyToken, chatController.startChat)
-router.post('/sendMessage', upload.single("myfile"), verify.verifyToken, chatController.sendMessage)
+router.post("/", verify.verifyToken, chatController.startChat);
+router.post(
+  "/sendMessage",
+  upload.single("myfile"),
+  verify.verifyToken,
+  chatController.sendMessage,
+);
+router.post("/getRealTimeMessages", chatController.getRealTimeMessages)
 
 module.exports = router;

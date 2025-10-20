@@ -35,6 +35,10 @@ exports.startChat = async (req, res) => {
     },
   });
 
+  if(!friendsId) {
+    return res.status(400).send({ error: "This user is not your friend anymore" });
+  }
+
   const userInChat = await prisma.user.findFirst({
     where: {
       id: id,

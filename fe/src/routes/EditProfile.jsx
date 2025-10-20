@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router";
+import socket from "./socket";
 export const EditProfile = ({
   about,
   user,
@@ -20,6 +21,21 @@ export const EditProfile = ({
   const [error, setError] = useState("");
   const [path, setPath] = useState('https://messaging-app-messaging-app-livee.up.railway.app');
 
+  useEffect(() => {
+    socket.on("edit", (user) => {
+      console.log(user)
+      localStorage.setItem("user", user.user.username);
+          localStorage.setItem("image", user.user.image);
+          localStorage.setItem("about", user.user.about);
+          localStorage.setItem("online", user.user.isOnline);
+          setUser(user.user.username);
+          setAbout(user.user.about);
+          setImage(user.user.image);
+          setOnline(user.user.isOnline);
+    });
+
+    return () => socket.off("edit");
+  }, []);
   const handleEdit = async (e) => {
     e.preventDefault();
     const accessToken = localStorage.getItem("accessToken");

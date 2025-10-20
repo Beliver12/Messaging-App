@@ -66,15 +66,17 @@ export const AddFriends = ({
     fetch(url, options)
       .then((res) => res.json())
       .then((data) => {
-        if (data.message === "Friend invite sent") {
+        if (data.message === "Friend invite sent") {      
           alert(data.message);
           setOtherUsers(data.users);
+          
         }
 
         if (data.message === "jwt expired") {
-          verifyToken({ token, setUser });
+          verifyToken({ token, setUser, path });
         }
       });
+      location.reload();
   };
 
   if (addFriendsOpen) {

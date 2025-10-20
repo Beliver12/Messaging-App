@@ -216,6 +216,10 @@ exports.editUserProfile = async (req, res) => {
   });
 
   io.emit("getStatusOfAllUsersInChat");
+  io.to(`user:${req.user.user.username}`).emit("edit", {
+    user: editedUser
+  })
+
   res.status(200).send({ message: "Edit successful!", user: editedUser });
 };
 

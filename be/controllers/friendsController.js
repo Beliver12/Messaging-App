@@ -364,6 +364,7 @@ exports.removeFriend = async (req, res) => {
   ]);
 
   const sockets = await io.in(`user:${friend.username}`).fetchSockets();
+  io.to(`user:${req.user.user.username}`).emit("removeUserForSameAccount")
 
   sockets.forEach((socket) => {
     socket.emit("removeUser", {

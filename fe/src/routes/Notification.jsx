@@ -75,7 +75,7 @@ export const Notifications = ({
       .then((data) => {
         console.log(data);
         if (data.message === "jwt expired") {
-          verifyToken({ token, setUser });
+          verifyToken({ token, setUser, path });
         }
         setNotifications(data.users);
         setNotificationLength(data.users.length);

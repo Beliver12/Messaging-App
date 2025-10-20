@@ -5,7 +5,7 @@ let io; // will be initialized later
 function initSocket(expressServer) {
   io = new Server(expressServer, {
     cors: {
-      origin: "https://messaging-app-seven-chi.vercel.app",
+      origin: 'https://messaging-app-seven-chi.vercel.app',
       credentials: true,
       methods: ["GET", "POST"],
     },

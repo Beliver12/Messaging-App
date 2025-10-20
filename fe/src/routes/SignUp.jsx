@@ -2,6 +2,8 @@ import { Link, Navigate } from "react-router";
 import { useState } from "react";
 
 export const SignUp = () => {
+  const userr = localStorage.getItem("user");
+  const [user, setUser] = useState(userr);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
@@ -48,6 +50,10 @@ export const SignUp = () => {
   };
 
   if (isSignedIn) {
+    return <Navigate to="/" />;
+  }
+
+  if(user) {
     return <Navigate to="/" />;
   }
 
@@ -106,11 +112,13 @@ export const SignUp = () => {
           />
           <label htmlFor="about">About you</label>
           <textarea
+           required
             name="about"
             onChange={(e) => setAbout(e.target.value)}
           ></textarea>
           <label htmlFor="myfile">Upload a profile image:</label>
           <input
+           required
             type="file"
             accept="image/*"
             id="myfile"

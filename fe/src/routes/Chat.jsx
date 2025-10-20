@@ -71,6 +71,10 @@ export const Chat = ({
     fetch(url, options)
       .then((res) => res.json())
       .then((data) => {
+        if(data.error === "This user is not your friend anymore") {
+          location.reload();
+          return false
+        }
         setChat(data.chat);
         setUserInChat(data.userInChat);
         setChatFormOpen(true);

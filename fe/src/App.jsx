@@ -108,12 +108,22 @@ export const LogInForm = ({ user, setUser }) => {
   }, [user]);
 
   useEffect(() => {
+    socket.on("removeUserForSameAccount", () => {
+      location.reload();
+    });
+
+    return () => socket.off("removeUserForSameAccount");
+  }, []);
+
+ 
+
+  useEffect(() => {
     socket.onAny((event, data) => {
       console.log("Client received event:", event, data);
     });
 
     socket.on("newFriendRequest", (user) => {
-      alert(`${user.username} sent you a friend request!`);
+      location.reload();
       setOtherUsers(user.users);
       console.log(socket.listeners("newFriendRequest").length);
     });
@@ -124,7 +134,7 @@ export const LogInForm = ({ user, setUser }) => {
   useEffect(() => {
     socket.on("removeUser", (user) => {
       getStatusOfAllUsersInChat();
-      alert(`${user.username} removed you from friends`);
+      location.reload();
       console.log(socket.listeners("removeUser").length);
     });
 
@@ -148,6 +158,7 @@ export const LogInForm = ({ user, setUser }) => {
   useEffect(() => {
     socket.on("getStatusOfAllUsersInChat", (user) => {
       getStatusOfAllUsersInChat();
+      getNotificationLength();
     });
 
     return () => socket.off("getStatusOfAllUsersInChat");
@@ -291,7 +302,12 @@ export const LogInForm = ({ user, setUser }) => {
             socket.emit("login", data.user.username);
           });
         } else {
+          
           setError(data.error);
+          document.querySelector(".error").style.display = "block";
+          setTimeout(() => {
+            document.querySelector(".error").style.display = "none";
+          }, 2000);
         }
       });
   };
@@ -301,6 +317,12 @@ export const LogInForm = ({ user, setUser }) => {
     setEditProfileOpen(true);
   };
 
+  const joinAsGuest = (e) => {
+    e.preventDefault();
+    setEmail("guest@gmail.com")
+    setPassword("123456")
+  }
+
   if (!user) {
     return (
       <>
@@ -309,29 +331,32 @@ export const LogInForm = ({ user, setUser }) => {
         <div className="logInPage">
           <form method="POST" onSubmit={logIn}>
             <h2>Log In</h2>
-            {error ? (
-              <p style={{ color: "red", backgroundColor: "black", padding: 4 }}>
+            
+              <p className="error" style={{ color: "red", backgroundColor: "black", padding: 4, display: "none"}}>
                 {error}!
               </p>
-            ) : (
-              ""
-            )}
+            
             <label htmlFor="email">E-mail</label>
             <input
               type="email"
+              value={email}
               name="email"
               maxLength="20"
+              required
               onChange={(e) => setEmail(e.target.value)}
             />
             <label htmlFor="password">Password</label>
             <input
               type="password"
               name="password"
+              value={password}
               maxLength="20"
+              required
               onChange={(e) => setPassword(e.target.value)}
             />
             <button type="submit">Log In</button>
             <p>Dont have account?</p>
+            <button onClick={joinAsGuest}>Log In As Guest</button>
             <Link to="signup">Sign Up</Link>
           </form>
         </div>
@@ -449,7 +474,7 @@ export const LogInForm = ({ user, setUser }) => {
 export const App = () => {
   const userr = localStorage.getItem("user");
   const [user, setUser] = useState(userr);
-
+ 
   useEffect(() => {
     joinUserRoom(userr); // join YOUR room
   }, [userr]);

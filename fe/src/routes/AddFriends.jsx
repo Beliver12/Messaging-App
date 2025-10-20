@@ -76,7 +76,7 @@ export const AddFriends = ({
           verifyToken({ token, setUser, path });
         }
       });
-      location.reload();
+      
   };
 
   if (addFriendsOpen) {
